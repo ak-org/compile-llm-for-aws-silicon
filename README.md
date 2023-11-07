@@ -1,7 +1,7 @@
-# How to compile llama-2-7b-chat for inf2.xlarge using Neuron SDK 2.15.0
+# How to compile llama-2-7b-chat for inf2.xlarge using Neuron SDK 2.14.1
 
 ## Introduction
-This repository show how to compile llama-2-7b-chat model for neuron cores using neuron SDK 2.15.0. The compilation process depends on the value of environment variable `NEURON_RT_NUM_CORES`. Currently it is set to 2 to match the number of cores in the inf2.xlarge instance type.
+This repository show how to compile llama-2-7b-chat model for neuron cores using neuron SDK 2.14.1. The compilation process depends on the value of environment variable `NEURON_RT_NUM_CORES`. Currently it is set to 2 to match the number of cores in the inf2.xlarge instance type.
 
 ## Pre-requisite
 
