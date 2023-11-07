@@ -1,6 +1,6 @@
 import boto3
 import sagemaker
-from sagemaker import Model
+from sagemaker import Model, image_uris, serializers, deserializers
 import os
 from datetime import datetime
 MODEL_NAME="smep-inf2-llama2-7b-chat"
@@ -12,25 +12,21 @@ boto3_session=boto3.session.Session(
 smr = boto3.client('sagemaker-runtime')
 sm = boto3.client('sagemaker')
 role = 'arn:aws:iam::102048127330:role/service-role/SageMaker-ak-datascientist'  # execution role for the endpoint
-#role = sagemaker.get_execution_role()
 instance_type = "ml.inf2.xlarge"
 endpoint_name = sagemaker.utils.name_from_base(MODEL_NAME)
 
-sess = sagemaker.session.Session(boto3_session, 
-                                 sagemaker_client=sm, 
-                                 sagemaker_runtime_client=smr)  # sagemaker session for interacting with different AWS APIs
+sess = sagemaker.session.Session(boto3_session, sagemaker_client=sm, sagemaker_runtime_client=smr)  # sagemaker session for interacting with different AWS APIs
 region = sess._region_name  # region name of the current SageMaker Studio environment
 account = sess.account_id()  # account_id of the current SageMaker Studio environment
 bucket_name = sess.default_bucket()
-prefix='torchserve/2.15.0'
+prefix='torchserve'
 output_path = f"s3://{bucket_name}/{prefix}"
-release='2.15.0'
 print(f'account={account}, region={region}, role={role}, output_path={output_path}')
 s3_uri = f'{output_path}/model_store/llama-2-7b-chat/' #  "s3://sagemaker-us-east-1-102048127330/torchserve/model_store/llama-2-13b-chat/"
 print("======================================")
 print(f'Will load artifacts from {s3_uri}')
 print("======================================")
-image_uri = f'102048127330.dkr.ecr.{region}.amazonaws.com/neuronx:{release}'
+image_uri = '102048127330.dkr.ecr.us-east-1.amazonaws.com/neuronx:2-14-1'
 
 
 model = Model(
@@ -58,5 +54,3 @@ model.deploy(
     model_data_download_timeout=3600, # increase the timeout to download large model
     container_startup_health_check_timeout=600, # increase the timeout to load large model
 )
-
-print('\n Model deployed \n')
