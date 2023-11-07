@@ -25,39 +25,34 @@ def opt_amp_callback(model: OPTForCausalLM, dtype: torch.dtype) -> None:
         block.fc2.to(dtype)
     model.lm_head.to(dtype)
 
-if __name__ == "__main__":
-    
-    if 'HUGGING_FACE_HUB_TOKEN' not in os.environ:
-        print('Hugging face Hub token is missing')
-        exit(-1)
-    # Define and parse command-line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--model_name", "-m", 
-        type=str, 
-        default="meta-llama/Llama-2-7b-chat-hf",
-        help="HuggingFace model name"
-    )
-    parser.add_argument(
-        "--save_path", "-s",
-        type=str,
-        default="../2.15.0/model_store/llama-2-7b-chat/llama-2-7b-chat-split/",
-        help="Output directory for downloaded model files",
-    )
-    args = parser.parse_args()
 
-    save_path = create_directory_if_not_exists(args.save_path)
+# Define and parse command-line arguments
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--model_name", "-m", type=str, required=True, help="HuggingFace model name"
+)
+parser.add_argument(
+    "--save_path",
+    type=str,
+    default="./model-splits",
+    help="Output directory for downloaded model files",
+)
+args = parser.parse_args()
 
-    # Load HuggingFace model
-    hf_model = AutoModelForCausalLM.from_pretrained(args.model_name, 
-                                                    low_cpu_mem_usage=True)
+save_path = create_directory_if_not_exists(args.save_path)
+
+# Load HuggingFace model config
+#hf_model_config = AutoConfig.from_pretrained(args.model_name)
+
+# Load HuggingFace model
+hf_model = AutoModelForCausalLM.from_pretrained(args.model_name, low_cpu_mem_usage=True)
 
 
-    # Save the model
-    save_pretrained_split(hf_model, args.save_path)
-    print('Model splitted and saved locally')
+# Save the model
+save_pretrained_split(hf_model, args.save_path)
+print('Model splitted and saved locally')
 
-    # Load and save tokenizer for the model
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
-    tokenizer.save_pretrained(args.save_path)
-    print('Tokenizer saved locally')
+# Load and save tokenizer for the model
+tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+tokenizer.save_pretrained(args.save_path)
+print('Tokenizer saved locally')
