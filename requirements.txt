@@ -1,0 +1,10 @@
+## packages for neuron sdk 2.15.0
+--extra-index-url https://pip.repos.neuron.amazonaws.com
+transformers-neuronx==0.8.268 
+neuronx-cc==2.11.0.34
+torch-neuronx==1.13.1.1.12.0
+## needed to package the model artifacts
+torchserve==0.9.0 
+## needed for LLamaTokenizer
+sentencepiece==0.1.99
+#transformers==4.34.1 
