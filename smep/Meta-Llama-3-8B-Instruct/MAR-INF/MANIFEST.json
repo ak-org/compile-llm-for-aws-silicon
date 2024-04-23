@@ -1,0 +1,12 @@
+{
+  "createdOn": "23/04/2024 17:27:16",
+  "runtime": "python",
+  "model": {
+    "modelName": "Meta-Llama-3-8B-Instruct",
+    "handler": "inf2_handler.py",
+    "modelVersion": "1.0",
+    "requirementsFile": "requirements.txt",
+    "configFile": "model-config.yaml"
+  },
+  "archiverVersion": "0.10.0"
+}

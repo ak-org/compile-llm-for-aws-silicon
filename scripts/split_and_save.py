@@ -17,17 +17,9 @@ def create_directory_if_not_exists(path_str: str) -> str:
         raise NotADirectoryError(path_str)
 
 
-def opt_amp_callback(model: OPTForCausalLM, dtype: torch.dtype) -> None:
-    """Casts attention and MLP to low precision only; layernorms stay as f32."""
-    for block in model.model.decoder.layers:
-        block.self_attn.to(dtype)
-        block.fc1.to(dtype)
-        block.fc2.to(dtype)
-    model.lm_head.to(dtype)
-
 if __name__ == "__main__":
     
-    if 'HUGGING_FACE_HUB_TOKEN' not in os.environ:
+    if 'HF_TOKEN' not in os.environ:
         print('Hugging face Hub token is missing')
         exit(-1)
     # Define and parse command-line arguments
@@ -35,13 +27,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name", "-m", 
         type=str, 
-        default="meta-llama/Llama-2-7b-chat-hf",
+        default="meta-llama/Meta-Llama-3-8B-Instruct",
         help="HuggingFace model name"
     )
     parser.add_argument(
         "--save_path", "-s",
         type=str,
-        default="../2.15.0/model_store/llama-2-7b-chat/llama-2-7b-chat-split/",
+        default="../2.18.1/model_store/Meta-Llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-split/",
         help="Output directory for downloaded model files",
     )
     args = parser.parse_args()

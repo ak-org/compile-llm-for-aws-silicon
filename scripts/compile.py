@@ -6,11 +6,11 @@ import os
 import torch_neuronx
 import sys 
 
-# we will pin cores to 2 for inf2.xlarge 
-os.environ['NEURON_RT_NUM_CORES'] = '2'
-os.environ["NEURON_CC_FLAGS"] = "-O3"  ## for best perf
-model_dir = "../2.15.0/model_store/llama-2-7b-chat/llama-2-7b-chat-split"
-model_compiled_dir="../2.15.0/model_store/llama-2-7b-chat/neuronx_artifacts"
+# we will pin cores to 8 for inf2.24xlarge 
+os.environ['NEURON_RT_NUM_CORES'] = '8'
+#os.environ["NEURON_CC_FLAGS"] = "-O3"  ## for best perf
+model_dir =  "../2.18.1/model_store/Meta-Llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-split/"
+model_compiled_dir="../2.18.1/model_store/Meta-Llama-3-8B-Instruct/neuronx_artifacts"
 if sys.argv[1] == "compile":
     start = time.time()
     model = LlamaForSampling.from_pretrained(
@@ -21,7 +21,7 @@ if sys.argv[1] == "compile":
             )
     model.to_neuron()
     # save model to the disk
-    model.save("../2.15.0/model_store/llama-2-7b-chat/neuronx_artifacts")
+    model.save(model_compiled_dir)
     elapsed = time.time() - start
     print(f'\nCompilation and loading took {elapsed} seconds\n')
 elif sys.argv[1] == "infer":
