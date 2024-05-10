@@ -1,4 +1,6 @@
-2.18.1/
+2.18/
 __pycache__
 log-neuron-cc.txt
 .vscode
+neuronxcc-*
+*.gz

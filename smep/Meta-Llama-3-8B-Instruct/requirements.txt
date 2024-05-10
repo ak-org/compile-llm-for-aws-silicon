@@ -1,3 +1,0 @@
-## additional packages 
-transformers==4.40.0
-sentencepiece
