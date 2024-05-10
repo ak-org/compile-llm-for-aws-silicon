@@ -11,6 +11,14 @@ This repository show how to compile Meta-Llama-3-8B-Instruct model for neuron co
 
 ## High level steps
 
+Create a new conda environment for Python 3.10 and install the packages listed in `requirements.txt`.
+
+```{.bash}
+conda create --name awschips_py310 -y python=3.10 ipykernel
+source activate awschips_py310;
+pip install -r requirements.txt
+```
+
 After you have set the huggingface token and AWS credential environment variabels properly:
 
 - Run `scripts/split_and_save.py` to download model from hugginface, split the model weights for neuron core and save it locally

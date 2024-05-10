@@ -4,3 +4,4 @@ log-neuron-cc.txt
 .vscode
 neuronxcc-*
 *.gz
+.ipynb_checkpoints
