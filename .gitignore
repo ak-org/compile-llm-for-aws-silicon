@@ -5,3 +5,5 @@ log-neuron-cc.txt
 neuronxcc-*
 *.gz
 .ipynb_checkpoints
+script.log
+smep-with-lmi/models/

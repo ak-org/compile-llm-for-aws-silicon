@@ -12,29 +12,34 @@ neuron_version=$3
 model_store=$4
 s3_bucket=$5
 prefix=$6
-local_dir=$3/$4/$2
+region=$7
+role=$8
+local_dir=neuron_version/$3/$4/$2
 export HF_TOKEN=$token
 
-echo model_id=$model_id, neuron_version=$neuron_version, model_store=$model_store, s3_bucket=$s3_bucket, prefix=$prefix
+echo model_id=$model_id, neuron_version=$neuron_version, model_store=$model_store, s3_bucket=$s3_bucket, prefix=$prefix, region=$region, role=$role
 
 # download the model
 echo going to download model_id=$model_id, local_dir=$local_dir
-#python scripts/split_and_save.py --model-name $model_id --save-path $local_dir
-echo moel download step completed
+# python scripts/split_and_save.py --model-name $model_id --save-path $local_dir
+echo model download step completed
 
 #"../2.18/model_store/Meta-Llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-split/"
 # compile the model
 echo starting model compilation...
-#python scripts/compile.py compile $local_dir
+# python scripts/compile.py compile $local_dir
 echo done with model compilation
 
 # now upload the model binaries to the s3 bucket
-echo going to upload from $neuron_version/$4/ to s3://$s3_bucket/$prefix/
-#aws s3 cp --recursive $neuron_version/$4/ s3://$s3_bucket/$prefix/
+echo going to upload from neuron_version/$neuron_version/$4/ to s3://$s3_bucket/$prefix/
+# aws s3 cp --recursive neuron_version/$neuron_version/$4/ s3://$s3_bucket/$prefix/
 echo done with s3 upload
 
+# dir for storing model artifacts
+model_dir=smep-with-lmi/models/$model_id
+mkdir -p $model_dir
 # prepare serving.properties
-serving_prop_fpath=smep-with-lmi/serving-inf2-$model_id.properties
+serving_prop_fpath=$model_dir/serving-inf2.properties
 cat << EOF > $serving_prop_fpath
 engine=Python
 option.entryPoint=djl_python.transformers_neuronx
@@ -50,13 +55,33 @@ option.neuron_optimize_level=3
 EOF
 
 # prepare model packaging script
-model_packaging_script_fpath=smep-with-lmi/package-inf2-$model_id.sh
+model_packaging_script_fpath=$model_dir/package-inf2.sh
 cat << EOF > $model_packaging_script_fpath
 mkdir mymodel
-cp serving-inf2-$model_id.properties  mymodel/serving.properties
+cp serving-inf2.properties  mymodel/serving.properties
 tar czvf mymodel-inf2.tar.gz mymodel/
 rm -rf mymodel
 aws s3 cp mymodel-inf2.tar.gz s3://${s3_bucket}/${prefix}/${model_id}/code/
 EOF
-chmod +x smep-with-lmi/package-inf2-$model_id.sh
+chmod +x $model_packaging_script_fpath
+
+# now change director to the model dir we just created and run
+# the above model packaging script which creates a model.tar.gz that has
+# the serving.properties which in turn contains the model path in s3 and 
+# other model parameters.
+cd $model_dir
+echo now in `pwd`
+./package-inf2.sh
+cd -
+echo now back in `pwd`
+
+# all set to deploy the model now
+python smep-with-lmi/deploy.py --device inf2 \
+  --aws-region $region \
+  --role-arn $role \
+  --bucket $s3_bucket \
+  --model-id $model_id \
+  --prefix $prefix
+
+echo all done
 

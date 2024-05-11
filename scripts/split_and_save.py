@@ -9,17 +9,6 @@ MODEL_REPO: str = "meta-llama"
 MODEL_ID: str = "Meta-Llama-3-8B-Instruct"
 NEURON_VER: str = "2.18.1"
 
-def create_directory_if_not_exists(path_str: str) -> str:
-    """Creates a directory if it doesn't exist, and returns the directory path."""
-    if os.path.isdir(path_str):
-        return path_str
-    elif input(f"{path_str} does not exist, create directory? [y/n]").lower() == "y":
-        os.makedirs(path_str)
-        return path_str
-    else:
-        raise NotADirectoryError(path_str)
-
-
 if __name__ == "__main__":
     
     if 'HF_TOKEN' not in os.environ:
@@ -43,7 +32,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(f"args={args}")
 
-    save_path = create_directory_if_not_exists(args.save_path)
+    save_path = os.makedirs(args.save_path, exist_ok=True)
 
     # Load HuggingFace model
     hf_model = AutoModelForCausalLM.from_pretrained(args.model_name, 
