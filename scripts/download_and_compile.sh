@@ -14,25 +14,28 @@ s3_bucket=$5
 prefix=$6
 region=$7
 role=$8
-local_dir=neuron_version/$3/$4/$2
+model_id_wo_repo=`basename $2`
+model_id_wo_repo_split=$model_id_wo_repo-split
+local_dir=neuron_version/$neuron_version/$model_store/$model_id_wo_repo/$model_id_wo_repo_split
 export HF_TOKEN=$token
 
-echo model_id=$model_id, neuron_version=$neuron_version, model_store=$model_store, s3_bucket=$s3_bucket, prefix=$prefix, region=$region, role=$role
+echo model_id=$model_id, local_dir=$local_dir, neuron_version=$neuron_version, model_store=$model_store, s3_bucket=$s3_bucket, prefix=$prefix, region=$region, role=$role
 
 # download the model
 echo going to download model_id=$model_id, local_dir=$local_dir
-# python scripts/split_and_save.py --model-name $model_id --save-path $local_dir
+#python scripts/split_and_save.py --model-name $model_id --save-path $local_dir
 echo model download step completed
 
 #"../2.18/model_store/Meta-Llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-split/"
 # compile the model
 echo starting model compilation...
-# python scripts/compile.py compile $local_dir
+# 
+#python scripts/compile.py compile $local_dir
 echo done with model compilation
 
 # now upload the model binaries to the s3 bucket
 echo going to upload from neuron_version/$neuron_version/$4/ to s3://$s3_bucket/$prefix/
-# aws s3 cp --recursive neuron_version/$neuron_version/$4/ s3://$s3_bucket/$prefix/
+#aws s3 cp --recursive neuron_version/$neuron_version/$model_store/ s3://$s3_bucket/$prefix/
 echo done with s3 upload
 
 # dir for storing model artifacts
@@ -43,7 +46,7 @@ serving_prop_fpath=$model_dir/serving-inf2.properties
 cat << EOF > $serving_prop_fpath
 engine=Python
 option.entryPoint=djl_python.transformers_neuronx
-option.model_id=s3://${s3_bucket}/${prefix}/${model_id}/${model_id}-split/
+option.model_id=s3://${s3_bucket}/${prefix}/${model_id_wo_repo}/${model_id_wo_repo_split}/
 option.load_split_model=True
 option.tensor_parallel_degree=8
 option.n_positions=4096
@@ -61,7 +64,7 @@ mkdir mymodel
 cp serving-inf2.properties  mymodel/serving.properties
 tar czvf mymodel-inf2.tar.gz mymodel/
 rm -rf mymodel
-aws s3 cp mymodel-inf2.tar.gz s3://${s3_bucket}/${prefix}/${model_id}/code/
+aws s3 cp mymodel-inf2.tar.gz s3://${s3_bucket}/${prefix}/${model_id_wo_repo}/${model_id_wo_repo_split}/code/
 EOF
 chmod +x $model_packaging_script_fpath
 
@@ -81,7 +84,9 @@ python smep-with-lmi/deploy.py --device inf2 \
   --role-arn $role \
   --bucket $s3_bucket \
   --model-id $model_id \
-  --prefix $prefix
+  --prefix $prefix \
+  --model-s3-uri s3://${s3_bucket}/${prefix}/${model_id_wo_repo}/${model_id_wo_repo_split}/code/mymodel-inf2.tar.gz \
+  --neuronx-artifacts-s3-uri s3://${s3_bucket}/${prefix}/${model_id_wo_repo}/neuronx_artifacts
 
 echo all done
 

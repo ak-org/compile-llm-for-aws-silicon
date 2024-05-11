@@ -79,6 +79,18 @@ if __name__ == "__main__":
         help="Image URI for the Inf2 inference container",
     )
 
+    parser.add_argument(
+        "--model-s3-uri",
+        type=str,
+        help="S3 URI for model.tar.gzr",
+    )
+
+    parser.add_argument(
+        "--neuronx-artifacts-s3-uri",
+        type=str,
+        help="S3 URI for Neuronx artifacts",
+    )
+
     args = parser.parse_args()
     logger.info(f"args={args}")
 
@@ -90,8 +102,9 @@ if __name__ == "__main__":
     bucket_name = args.bucket
     model_id = args.model_id
     prefix = args.prefix
+    s3_uri = args.model_s3_uri
+    neuronx_artifacts = args.neuronx_artifacts_s3_uri
 
-    s3_uri = f"s3://{bucket_name}/{prefix}/{model_id}/code/mymodel-{dev}.tar.gz"
     if dev == 'gpu':        
         instance_type = args.gpu_instance_type
         image_uri = args.gpu_image_uri
@@ -105,6 +118,7 @@ if __name__ == "__main__":
     model_name = f"{model_id}-{dev}".replace("/", "-")
     endpoint_name = sagemaker.utils.name_from_base(model_name)
     logger.info(f"going to deploy model_id={model_id}, endpoint={endpoint_name},\
+                  s3_uri={s3_uri}\
                   aws_region={aws_region}\
                   role={role},\
                   bucket_name={bucket_name},\
@@ -141,7 +155,7 @@ if __name__ == "__main__":
         image_uri=image_uri,
         role=role,
         env = {
-            "NEURON_COMPILE_CACHE_URL": f"s3://{bucket_name}/{prefix}/{model_id}/neuronx_artifacts/"
+            "NEURON_COMPILE_CACHE_URL": neuronx_artifacts
         },
         sagemaker_session=sess
         #env - set TS_INSTALL_PY_DEP_PER_MODEL to true, if you are using Pytorch serving
