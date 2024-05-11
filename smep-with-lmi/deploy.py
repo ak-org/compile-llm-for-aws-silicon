@@ -1,4 +1,3 @@
-
 import boto3
 import sagemaker
 import os
@@ -17,21 +16,24 @@ dev = sys.argv[1]
 
 aws_region = 'us-east-1'
 os.environ['AWS_DEFAULT_REGION'] = aws_region
-role = 'arn:aws:iam::102048127330:role/service-role/SageMaker-ak-datascientist'  # execution role for the endpoint
-bucket_name = 'sagemaker-us-east-1-102048127330'
+role = 'arn:aws:iam::015469603702:role/SageMakerRepoRole'  # execution role for the endpoint
+bucket_name = 'llm-models'
+model_id="Meta-Llama-3-8B-Instruct"
+prefix="lmi"
+
 if dev == 'gpu':
-    s3_uri = f"s3://{bucket_name}/lmi/Meta-Llama-3-8B-Instruct/code/mymodel-{dev}.tar.gz"
+    s3_uri = f"s3://{bucket_name}/{prefix}/{model_id}/code/mymodel-{dev}.tar.gz"
     instance_type = "ml.g5.12xlarge"
     image_uri = '763104351884.dkr.ecr.us-east-1.amazonaws.com/djl-inference:0.27.0-deepspeed0.12.6-cu121'
 elif dev == 'inf2':
     neuronx_sdk_release = '2.18.1'
-    s3_uri = f"s3://{bucket_name}/lmi/Meta-Llama-3-8B-Instruct/code/mymodel-{dev}.tar.gz"
+    s3_uri = f"s3://{bucket_name}/{prefix}/{model_id}/code/mymodel-{dev}.tar.gz"
     instance_type = "ml.inf2.24xlarge"
     image_uri = f'763104351884.dkr.ecr.us-east-1.amazonaws.com/djl-inference:0.27.0-neuronx-sdk2.18.1'
 else:
     print('Invalid device type')
     exit(-1)
-MODEL_NAME=f"smep-{dev}-Meta-Llama-3-8B-Instruct"
+MODEL_NAME=f"smep-{dev}-{model_id}"
 endpoint_name = sagemaker.utils.name_from_base(MODEL_NAME)
 
 boto3_session=boto3.session.Session(region_name=aws_region)
@@ -63,7 +65,7 @@ model = Model(
     image_uri=image_uri,
     role=role,
     env = {
-        "NEURON_COMPILE_CACHE_URL": "s3://sagemaker-us-east-1-102048127330/lmi/Meta-Llama-3-8B-Instruct/neuronx_artifacts/"
+        "NEURON_COMPILE_CACHE_URL": f"s3://{bucket_name}/{prefix}/{model_id}/neuronx_artifacts/"
     },
     sagemaker_session=sess
     #env - set TS_INSTALL_PY_DEP_PER_MODEL to true, if you are using Pytorch serving
