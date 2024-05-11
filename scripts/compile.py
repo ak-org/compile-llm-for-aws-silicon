@@ -1,12 +1,12 @@
+import os
+import sys
+import time
+import torch
+import torch_neuronx
+from transformers import AutoTokenizer
+from transformers_neuronx.config import GenerationConfig
 from transformers_neuronx.llama.model import LlamaForSampling
 from transformers_neuronx import LlamaForSampling, NeuronConfig, GQA, QuantizationConfig
-from transformers_neuronx.config import GenerationConfig 
-from transformers import AutoTokenizer
-import torch
-import time
-import os 
-import torch_neuronx
-import sys 
 
 # we will pin cores to 8 for inf2.24xlarge 
 os.environ['NEURON_RT_NUM_CORES'] = '8'
@@ -15,14 +15,12 @@ BATCH_SIZE = 4
 CONTEXT_LENGTH = 44 # hard coded for sample prompt
 model_dir = sys.argv[2] 
 model_compiled_dir = os.path.join(os.path.dirname(os.path.dirname(model_dir)), "neuronx_artifacts")
-neuron_config = NeuronConfig(
-                    on_device_embedding=False,
-                    attention_layout='BSH',
-                    fuse_qkv=True,
-                    group_query_attention=GQA.REPLICATED_HEADS,
-                    quant=QuantizationConfig(),
-                    on_device_generation=GenerationConfig(do_sample=True)
-              )
+neuron_config = NeuronConfig(on_device_embedding=False,
+                             attention_layout='BSH',
+                             fuse_qkv=True,
+                             group_query_attention=GQA.REPLICATED_HEADS,
+                             quant=QuantizationConfig(),
+                             on_device_generation=GenerationConfig(do_sample=True))
 
 if sys.argv[1] == "compile":
     start = time.time()
@@ -67,7 +65,7 @@ elif sys.argv[1] == "infer":
     model.load(model_compiled_dir)
     model.to_neuron()
     elapsed = time.time() - start
-    print(f'\n Model successfully loaded in {elapsed} seconds')
+    print(f'\nModel successfully loaded in {elapsed} seconds')
 
 
     # run inference with top-k sampling
