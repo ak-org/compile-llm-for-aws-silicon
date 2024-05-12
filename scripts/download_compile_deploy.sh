@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-# download and compile a model from HuggingFace
+# download model from HuggingFace -> compile it for Neuron -> deploy on SageMaker
 # param 1: HuggingFace token
 # param 2: HuggingFace model id, for example meta-llama/Meta-Llama-3-8B-Instruct
 # param 3: local directory path to save the model
@@ -23,19 +23,18 @@ echo model_id=$model_id, local_dir=$local_dir, neuron_version=$neuron_version, m
 
 # download the model
 echo going to download model_id=$model_id, local_dir=$local_dir
-#python scripts/split_and_save.py --model-name $model_id --save-path $local_dir
+python scripts/split_and_save.py --model-name $model_id --save-path $local_dir
 echo model download step completed
 
 #"../2.18/model_store/Meta-Llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-split/"
 # compile the model
 echo starting model compilation...
-# 
-#python scripts/compile.py compile $local_dir
+python scripts/compile.py compile --action compile --batch-size 8 --num-neuron-cores 8 --model-dir $local_dir
 echo done with model compilation
 
 # now upload the model binaries to the s3 bucket
 echo going to upload from neuron_version/$neuron_version/$4/ to s3://$s3_bucket/$prefix/
-#aws s3 cp --recursive neuron_version/$neuron_version/$model_store/ s3://$s3_bucket/$prefix/
+aws s3 cp --recursive neuron_version/$neuron_version/$model_store/ s3://$s3_bucket/$prefix/
 echo done with s3 upload
 
 # dir for storing model artifacts
