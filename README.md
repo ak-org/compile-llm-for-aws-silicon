@@ -32,14 +32,26 @@ This repository shows how to compile Foundation Models (FMs) such as `Meta-Llama
     1. Deploy the model on a SageMaker endpoint.
     ```{.bash}
     # replace the model id, bucket name and role parameters as appropriate
+    hf_token="your-hugging-face-token"
     model_id=meta-llama/Meta-Llama-3-8B-Instruct
     neuron_version=2.18
     model_store=model_store
     s3_bucket="your-s3_bucket-name"
     s3_prefix=lmi
-    region=us-east-1
+    region=us-east-1    
+    batch_size=4
+    num_neuron_cores=8
     role="execution-role-arn-to-be-used-by-the-sagemaker-endpoint"
-    ./scripts/download_compile_deploy.sh <your-hugging-face-token> $model_id $neuron_version $model_store $s3_bucket $s3_prefix $region $role > script.log 2>&1 
+    ./scripts/download_compile_deploy.sh $hf_token \
+     $model_id \
+     $neuron_version \
+     $model_store \
+     $s3_bucket \
+     $s3_prefix \
+     $region \
+     $role \
+     $batch_size \
+     $num_neuron_cores> script.log 2>&1 
     ```
 1. The model is deployed now, note the endpoint name from the SageMaker console and you can use it for testing inference via the SageMaker `invoke_endpoint` call as shown in `infer.py` included in this repo, and also, benchmarking performance via the Bring Your Own Endpoint option in [`FMBench`](https://github.com/aws-samples/foundation-model-benchmarking-tool).
 

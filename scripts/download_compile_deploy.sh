@@ -14,12 +14,16 @@ s3_bucket=$5
 prefix=$6
 region=$7
 role=$8
+batch_size=$9
+num_neuron_cores=$10
 model_id_wo_repo=`basename $2`
 model_id_wo_repo_split=$model_id_wo_repo-split
 local_dir=neuron_version/$neuron_version/$model_store/$model_id_wo_repo/$model_id_wo_repo_split
 export HF_TOKEN=$token
 
-echo model_id=$model_id, local_dir=$local_dir, neuron_version=$neuron_version, model_store=$model_store, s3_bucket=$s3_bucket, prefix=$prefix, region=$region, role=$role
+echo model_id=$model_id, local_dir=$local_dir, neuron_version=$neuron_version, model_store=$model_store
+echo s3_bucket=$s3_bucket, prefix=$prefix, region=$region, role=$role
+echo batch_size=$batch_size, num_neuron_cores=$num_neuron_cores
 
 # download the model
 echo going to download model_id=$model_id, local_dir=$local_dir
@@ -29,7 +33,7 @@ echo model download step completed
 #"../2.18/model_store/Meta-Llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-split/"
 # compile the model
 echo starting model compilation...
-python scripts/compile.py compile --action compile --batch-size 8 --num-neuron-cores 8 --model-dir $local_dir
+python scripts/compile.py compile --action compile --batch-size $batch_size --num-neuron-cores $num_neuron_cores --model-dir $local_dir
 echo done with model compilation
 
 # now upload the model binaries to the s3 bucket
