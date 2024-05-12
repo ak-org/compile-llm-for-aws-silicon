@@ -33,7 +33,7 @@ echo model download step completed
 #"../2.18/model_store/Meta-Llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-split/"
 # compile the model
 echo starting model compilation...
-python scripts/compile.py compile --action compile --batch-size $batch_size --num-neuron-cores $num_neuron_cores --model-dir $local_dir
+python scripts/compile.py --action compile --batch-size $batch_size --num-neuron-cores $num_neuron_cores --model-dir $local_dir
 echo done with model compilation
 
 # now upload the model binaries to the s3 bucket
