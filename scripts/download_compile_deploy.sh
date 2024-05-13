@@ -16,6 +16,7 @@ region=$7
 role=$8
 batch_size=$9
 num_neuron_cores=$10
+ml_instance_type=$11
 model_id_wo_repo=`basename $2`
 model_id_wo_repo_split=$model_id_wo_repo-split
 local_dir=neuron_version/$neuron_version/$model_store/$model_id_wo_repo/$model_id_wo_repo_split
@@ -23,12 +24,16 @@ export HF_TOKEN=$token
 
 echo model_id=$model_id, local_dir=$local_dir, neuron_version=$neuron_version, model_store=$model_store
 echo s3_bucket=$s3_bucket, prefix=$prefix, region=$region, role=$role
-echo batch_size=$batch_size, num_neuron_cores=$num_neuron_cores
+echo batch_size=$batch_size, num_neuron_cores=$num_neuron_cores, ml_instance_type=$ml_instance_type
 
 # download the model
 echo going to download model_id=$model_id, local_dir=$local_dir
 python scripts/split_and_save.py --model-name $model_id --save-path $local_dir
 echo model download step completed
+
+# LLama3 tokenizer fix
+tokenizer_config_json=`find . -name tokenizer_config.json`
+sed -i 's/end_of_text/eot_id/g' $tokenizer_config_json
 
 #"../2.18/model_store/Meta-Llama-3-8B-Instruct/Meta-Llama-3-8B-Instruct-split/"
 # compile the model
@@ -88,6 +93,7 @@ python smep-with-lmi/deploy.py --device inf2 \
   --bucket $s3_bucket \
   --model-id $model_id \
   --prefix $prefix \
+  --inf2-instance-type $ml_instance_type \
   --model-s3-uri s3://${s3_bucket}/${prefix}/${model_id_wo_repo}/${model_id_wo_repo_split}/code/mymodel-inf2.tar.gz \
   --neuronx-artifacts-s3-uri s3://${s3_bucket}/${prefix}/${model_id_wo_repo}/neuronx_artifacts
 
