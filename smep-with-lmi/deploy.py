@@ -7,6 +7,10 @@ import sagemaker
 from sagemaker import Model
 from sagemaker.utils import name_from_base
 
+root = logging.getLogger()
+if root.handlers:
+    for handler in root.handlers:
+        root.removeHandler(handler)
 logging.basicConfig(format='[%(asctime)s] p%(process)s {%(filename)s:%(lineno)d} %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -104,7 +108,6 @@ if __name__ == "__main__":
     prefix = args.prefix
     s3_uri = args.model_s3_uri
     neuronx_artifacts = args.neuronx_artifacts_s3_uri
-
     if dev == 'gpu':        
         instance_type = args.gpu_instance_type
         image_uri = args.gpu_image_uri
