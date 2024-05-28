@@ -32,17 +32,17 @@ This repository shows how to compile Foundation Models (FMs) such as `Meta-Llama
     1. Deploy the model on a SageMaker endpoint.
     ```{.bash}
     # replace the model id, bucket name and role parameters as appropriate
-    hf_token=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
+    hf_token=<your-hf-token>
     model_id=meta-llama/Meta-Llama-3-8B-Instruct
     neuron_version=2.18
     model_store=model_store
-    s3_bucket="llm-models"
+    s3_bucket="<your-s3-bucket>"
     s3_prefix=lmi
     region=us-east-1    
     batch_size=4
     num_neuron_cores=8
     ml_instance_type=ml.trn1.32xlarge
-    role="arn:aws:iam::015469603702:role/SageMakerRepoRole"
+    role="arn:aws:iam::<your-account-id>:role/SageMakerRepoRole"
     ./scripts/download_compile_deploy.sh $hf_token \
      $model_id \
      $neuron_version \
