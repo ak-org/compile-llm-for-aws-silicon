@@ -7,13 +7,27 @@ This repository shows how to compile Foundation Models (FMs) such as `Meta-Llama
 
 1. The Neuron SDK requires that you compile the model on an Inferentia instance. So this code needs to be run on an `Inf2` EC2 instance. The `Meta-Llama-3-8B-Instruct` was compiled on an `inf2.24xlarge` instance.
 
+1. Create an `Inf2` based EC2 instance.
+    1. Use the `Hugging Face Neuron Deep Learning AMI (Ubuntu 22.04)` AMI for your instance.
+    1. Use `inf2.24xlarge` or `trn1.32xlarge` as the instance type.
+    1. Have [`AmazonSageMakerFullAccess`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonSageMakerFullAccess.html) policy assigned to the IAM role associated with your EC2 instance. Add the following Trust Relationship added to the IAM role.
+        ```{.bash}
+       
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "sagemaker.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+        ```
+
 1. You need a valid Hugging Face token to download gated models from the Hugging Face model hub.
 
 >It is best to use `VSCode` to connect to your EC2 instance as we would be running the code from a `bash` shell.
 
 ## High level steps
 
-1. Create an `Inf2` based EC2 instance.
 1. Download and install [Conda](https://www.anaconda.com/download#linux) on your EC2 VM.
 1. Create a new conda environment for `Python 3.10` and install the packages listed in `requirements.txt`.
 
