@@ -10,6 +10,10 @@ from transformers_neuronx.config import GenerationConfig
 from transformers_neuronx.llama.model import LlamaForSampling
 from transformers_neuronx import LlamaForSampling, NeuronConfig, GQA, QuantizationConfig
 
+root = logging.getLogger()
+if root.handlers:
+    for handler in root.handlers:
+        root.removeHandler(handler)
 logging.basicConfig(format='[%(asctime)s] p%(process)s {%(filename)s:%(lineno)d} %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 

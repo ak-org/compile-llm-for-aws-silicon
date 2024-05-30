@@ -7,13 +7,27 @@ This repository shows how to compile Foundation Models (FMs) such as `Meta-Llama
 
 1. The Neuron SDK requires that you compile the model on an Inferentia instance. So this code needs to be run on an `Inf2` EC2 instance. The `Meta-Llama-3-8B-Instruct` was compiled on an `inf2.24xlarge` instance.
 
+1. Create an `Inf2` based EC2 instance.
+    1. Use the `Hugging Face Neuron Deep Learning AMI (Ubuntu 22.04)` AMI for your instance.
+    1. Use `inf2.24xlarge` or `trn1.32xlarge` as the instance type.
+    1. Have [`AmazonSageMakerFullAccess`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonSageMakerFullAccess.html) policy assigned to the IAM role associated with your EC2 instance. Add the following Trust Relationship added to the IAM role.
+        ```{.bash}
+       
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "sagemaker.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+        ```
+
 1. You need a valid Hugging Face token to download gated models from the Hugging Face model hub.
 
 >It is best to use `VSCode` to connect to your EC2 instance as we would be running the code from a `bash` shell.
 
 ## High level steps
 
-1. Create an `Inf2` based EC2 instance.
 1. Download and install [Conda](https://www.anaconda.com/download#linux) on your EC2 VM.
 1. Create a new conda environment for `Python 3.10` and install the packages listed in `requirements.txt`.
 
@@ -32,17 +46,17 @@ This repository shows how to compile Foundation Models (FMs) such as `Meta-Llama
     1. Deploy the model on a SageMaker endpoint.
     ```{.bash}
     # replace the model id, bucket name and role parameters as appropriate
-    hf_token="your-hugging-face-token"
+    hf_token=<your-hf-token>
     model_id=meta-llama/Meta-Llama-3-8B-Instruct
     neuron_version=2.18
     model_store=model_store
-    s3_bucket="your-s3_bucket-name"
+    s3_bucket="<your-s3-bucket>"
     s3_prefix=lmi
     region=us-east-1    
     batch_size=4
     num_neuron_cores=8
-    ml_instance_type=ml.inf2.24xlarge
-    role="execution-role-arn-to-be-used-by-the-sagemaker-endpoint"
+    ml_instance_type=ml.trn1.32xlarge
+    role="arn:aws:iam::<your-account-id>:role/SageMakerRepoRole"
     ./scripts/download_compile_deploy.sh $hf_token \
      $model_id \
      $neuron_version \
@@ -52,8 +66,8 @@ This repository shows how to compile Foundation Models (FMs) such as `Meta-Llama
      $region \
      $role \
      $batch_size \
-     $ml_instance_type \
-     $num_neuron_cores> script.log 2>&1 
+     $num_neuron_cores \
+     $ml_instance_type> script.log 2>&1 
     ```
 1. The model is deployed now, note the endpoint name from the SageMaker console and you can use it for testing inference via the SageMaker `invoke_endpoint` call as shown in `infer.py` included in this repo, and also, benchmarking performance via the Bring Your Own Endpoint option in [`FMBench`](https://github.com/aws-samples/foundation-model-benchmarking-tool).
 
